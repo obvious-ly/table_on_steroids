@@ -1,0 +1,21 @@
+<% table_on_steroid_id ||= nil %>
+<tr>
+  <% columns_on_steroid.each_pair do | k , v | %>
+    <td class="column column-<%= k %> <%= 'd-none' unless selected_columns.include?(k) %> filter-cell-left <%= v[:css_class].join(' ') if(v[:css_class]) %> <%= table_on_steroid_id %>">
+      <% if v[:type] == 'filter' %>
+        <%= select_tag("filters[#{k}]", options_for_select(v[:select_values], params[:filters] && params[:filters][k]), multiple: v[:multiselect], class: 'selectpicker form-control filter-control', data: { "none-selected-text" => v[:label], style: 'table-on-steroids-selectpicker ', table_on_steroid_id: table_on_steroid_id}, table_on_steroid_id: table_on_steroid_id ) %>
+      <% elsif((v[:activerecord].present? && v[:activerecord][:search_lambda].present?) || (v[:array].present? && v[:array][:search_lambda].present?)) %>
+        <% operator_present = (v[:datatype].present? && ['date','integer'].include?(v[:datatype])) %>
+        <% if operator_present %>
+          <% operator_options = ((['date'].include?(v[:datatype])) ? [["On","="],["Before","<"],["After",">"]] : ["=",">","<"]) %>
+          <%= select_tag 'search_operator_' + k, options_for_select(operator_options, params['search_operator_' + k]), class: 'form-control filter-control table-on-steroid-form-operator', table_on_steroid_id: table_on_steroid_id, operator_value_field: 'search_' + k %>
+        <% end %>
+        <% if(v[:datatype] == 'integer') %>
+          <%= number_field_tag 'search_' + k, params["search_" + k], placeholder: 'Search..', class: ('form-control filter-control filter-with-operator'), table_on_steroid_id: table_on_steroid_id %>
+        <% else %>
+          <%= text_field_tag 'search_' + k, params["search_" + k], placeholder: 'Search..', class: ('form-control filter-control' + (' date_search' if v[:datatype] == 'date').to_s + ((operator_present) ? " filter-with-operator" : " filter-without-operator")), table_on_steroid_id: table_on_steroid_id %>
+        <% end %>
+      <% end %>
+    </td>
+  <% end %>
+</tr>

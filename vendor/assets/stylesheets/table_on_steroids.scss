@@ -1,0 +1,119 @@
+//= require bootstrap-multiselect
+
+
+.table-on-steroids{
+  thead{
+    tr{
+      td:first-child {
+        border-left: 1px solid #cad6e0;
+      }
+      td {
+        border-right: 1px solid #cad6e0;
+      }
+    }
+    th{
+      padding: 5px;
+      label{
+        cursor: pointer;
+      }
+      input[type=radio]{
+        display: none
+      }
+      label:hover input[type=radio] ~ .checkmark {
+        background-color: #ccc;
+        color: green;
+      }
+      
+      label input:checked ~ .checkmark {
+        background: white;
+        color: green;
+      }
+      .checkmark {
+        font-size: medium;
+        font-weight: bold;
+        padding: 2px 4px;
+        border-radius: 37%;
+      }
+      .bootstrap-select > .dropdown-toggle.bs-placeholder.btn-primary{
+        color: white;
+        text-transform: uppercase;
+        font-size: 100%;
+        font-weight: bold;
+        text-overflow: ellipsis;
+      }
+      .dropdown-menu li a{
+        color: green;
+      }
+      .bootstrap-select:not([class*="col-"]):not([class*="form-control"]):not(.input-group-btn){
+        width: 180px;
+      }
+    }
+    td{
+      padding: 5px;
+    }
+  }
+  tbody{
+    td{
+      overflow: hidden;
+      padding: 5px;
+    }
+  }
+
+  .table-on-steroid-cell {
+    max-width: 210px;
+  }
+
+  .table-on-steroid-cell-min-220 {
+    min-width: 220px;
+  }
+
+  .table-on-steroid-form-operator {
+    width:30%;
+    display:inline-block;
+    padding-left: 0px;
+  }
+
+  .filter-with-operator {
+    width:63%;
+    display:inline-block;
+  }
+
+  .filter-without-operator {
+    width:100%;
+    display:inline-block;
+  }
+
+  .remove_search {
+    float:left;
+    padding-top:15px;
+    height:50px;
+  }
+
+  .column_filter {
+    float:right;
+    ul{
+      width: 100%;
+      li{
+        padding: 5px;
+      }
+    }
+  }
+
+  .global-search {
+    width:40%;
+    display:inline-block;
+  }
+
+  .header-padding {
+    padding-bottom:20px;
+  }
+
+  .header-text-h1 {
+    font-weight: bold;
+    font-size: 30px;
+    color: #585858;
+    
+  }
+
+
+}
