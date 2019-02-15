@@ -17,86 +17,86 @@
     <% param_hash.select{ |k,v| !expected_column_keys.include?(k) && !["utf8","columns[]"].include?(k) }.each do |k,v| %>
       <%= hidden_field_tag k, v[0]  %>
     <% end %>
-    <div class="row">
-      <div class="col-8 col-sn-12">
-        <div class="header-text-h1">
-          <% if title %>
-            <%= title %>
-          <% end %>
-        </div>
-      </div>
-      <div class="col-8 col-sn-12" style="text-align:right">
-        <% if(search_lambda) %>
-          <%= text_field_tag 'search', params[:search], placeholder: 'Search ..', onchange: "$('#knowledge_base_filters#{table_on_steroid_id}').submit();", class: 'form-control global-search' %>
+  <%end%>
+  <div class="row">
+    <div class="col-8 col-sn-12">
+      <div class="header-text-h1">
+        <% if title %>
+          <%= title %>
         <% end %>
       </div>
     </div>
-    <% if(subtext_partial) %>
-      <div class="row">
-        <div class="col-12">
-          <div>
-            <%= render partial: subtext_partial, locals: local_assigns %>
-          </div>
-        </div>
-      </div>
-    <% end %>
-    <div class="remove_search">
-      <% if(!columns.collect{ |c,v| params["search_" + c]}.reject!(&:blank?).empty?) %>
-        <%= link_to request.path, style: "text-decoration:none;padding-right:5px;"  do %>
-          <i class="fa fa-window-close fa-lg"></i>
-        <% end %>
-        <%= t('shared.table_on_steroid.remove_search') %>
+    <div class="col-8 col-sn-12" style="text-align:right">
+      <% if(search_lambda) %>
+        <%= text_field_tag 'search', params[:search], placeholder: 'Search ..', onchange: "$('#knowledge_base_filters#{table_on_steroid_id}').submit();", class: 'form-control global-search', form: "knowledge_base_filters#{table_on_steroid_id}"  %>
       <% end %>
     </div>
-    <div class="column_filter">
-      <%= select_tag("columns#{table_on_steroid_id}", options_for_select(columns.map{|c| [c[1][:label], c[0]]}, selected_columns), multiple: true, class: "column-selector table-on-steroids-selectpicker #{table_on_steroid_id}", data: {"none-selected-text" => "Display columns (max #{max_column})", "max-options" => max_column } ) %>
-    </div>
-    <% if(download_csv) %>
-      <div class="float-right">
-        <a href="<%= (download_csv + "?filter=#{request.query_string.to_s}") %>" style="float:right">
-          <%= image_tag "csv.png", :height => "25", :style => "padding-top:5px;" %>
-        </a>
+  </div>
+  <% if(subtext_partial) %>
+    <div class="row">
+      <div class="col-12">
+        <div>
+          <%= render partial: subtext_partial, locals: local_assigns %>
+        </div>
       </div>
+    </div>
+  <% end %>
+  <div class="remove_search">
+    <% if(!columns.collect{ |c,v| params["search_" + c]}.reject!(&:blank?).empty?) %>
+      <%= link_to request.path, style: "text-decoration:none;padding-right:5px;"  do %>
+        <i class="fa fa-window-close fa-lg"></i>
+      <% end %>
+      <%= t('shared.table_on_steroid.remove_search') %>
     <% end %>
+  </div>
+  <div class="column_filter">
+    <%= select_tag("columns#{table_on_steroid_id}", options_for_select(columns.map{|c| [c[1][:label], c[0]]}, selected_columns), multiple: true, class: "column-selector table-on-steroids-selectpicker #{table_on_steroid_id}", data: {"none-selected-text" => "Display columns (max #{max_column})", "max-options" => max_column }, form: "knowledge_base_filters#{table_on_steroid_id}") %>
+  </div>
+  <% if(download_csv) %>
+    <div class="float-right">
+      <a href="<%= (download_csv + "?filter=#{request.query_string.to_s}") %>" style="float:right">
+        <%= image_tag "csv.png", :height => "25", :style => "padding-top:5px;" %>
+      </a>
+    </div>
+  <% end %>
+  <% if(objects.is_a?(ActiveRecord::Base) || objects.is_a?(ActiveRecord::Relation)) %>
+    <%= paginate objects, theme: 'twitter-bootstrap-4' %>
+  <% end %>
+  <table class="table table-striped table-bordered table-hover">
+    <thead>
+      <tr>
+        <% columns.each_pair do | k , v | %>
+          <th class="column column-<%= k %> <%= ' d-none ' unless selected_columns.include?(k) %> <%= v[:css_class].join(' ') if(v[:css_class]) %> <%= table_on_steroid_id %>">
+            <% if v[:type] == 'order' %>
+              <label>
+                <%= v[:label] %>
+                <%= radio_button('knowledge', 'order', k, onchange: "$('#knowledge_base_filters#{table_on_steroid_id}').submit();", checked: params[:knowledge] && params[:knowledge][:order] == k, form: "knowledge_base_filters#{table_on_steroid_id}" ) %>
+                v
+              </label>
+            <% else %>
+              <%= v[:label] %>
+            <% end %>
+          </th>
+        <% end %>
+      </tr>
+      <%= render partial: "table_on_steroids/table_on_steroids_filters", locals: {columns_on_steroid: columns, selected_columns: selected_columns, table_on_steroid_id: table_on_steroid_id} %>
+    </thead>
+    <tbody>
+      <% objects.each do |o| %>
+        <tr>
+          <% columns.each_pair do | k , v | %>
+            <% val = v[:value_lambda].call(o, self) %>
+            <td class="column column-<%= k %> <%= 'd-none' unless selected_columns.include?(k) %> <%= v[:css_class].join(' ') if(v[:css_class]) %> <%= table_on_steroid_id %>">
+              <%= val.is_a?(String) ? val.html_safe : val %>
+            </td>
+          <% end %>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+  <div style="padding-top:20px">
     <% if(objects.is_a?(ActiveRecord::Base) || objects.is_a?(ActiveRecord::Relation)) %>
       <%= paginate objects, theme: 'twitter-bootstrap-4' %>
     <% end %>
-    <table class="table table-striped table-bordered table-hover">
-      <thead>
-        <tr>
-          <% columns.each_pair do | k , v | %>
-            <th class="column column-<%= k %> <%= ' d-none ' unless selected_columns.include?(k) %> <%= v[:css_class].join(' ') if(v[:css_class]) %> <%= table_on_steroid_id %>">
-              <% if v[:type] == 'order' %>
-                <label>
-                  <%= v[:label] %>
-                  <%= radio_button('knowledge', 'order', k, onchange: "$('#knowledge_base_filters#{table_on_steroid_id}').submit();", checked: params[:knowledge] && params[:knowledge][:order] == k ) %>
-                  v
-                </label>
-              <% else %>
-                <%= v[:label] %>
-              <% end %>
-            </th>
-          <% end %>
-        </tr>
-        <%= render partial: "table_on_steroids/table_on_steroids_filters", locals: {columns_on_steroid: columns, selected_columns: selected_columns, table_on_steroid_id: table_on_steroid_id} %>
-      </thead>
-      <tbody>
-        <% objects.each do |o| %>
-          <tr>
-            <% columns.each_pair do | k , v | %>
-              <% val = v[:value_lambda].call(o, self) %>
-              <td class="column column-<%= k %> <%= 'd-none' unless selected_columns.include?(k) %> <%= v[:css_class].join(' ') if(v[:css_class]) %> <%= table_on_steroid_id %>">
-                <%= val.is_a?(String) ? val.html_safe : val %>
-              </td>
-            <% end %>
-          </tr>
-        <% end %>
-      </tbody>
-    </table>
-    <div style="padding-top:20px">
-      <% if(objects.is_a?(ActiveRecord::Base) || objects.is_a?(ActiveRecord::Relation)) %>
-        <%= paginate objects, theme: 'twitter-bootstrap-4' %>
-      <% end %>
-    </div>
-  <% end %>
+  </div>
 </div>
