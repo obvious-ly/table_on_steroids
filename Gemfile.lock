@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    table_on_steroids (0.1.0.3)
+    table_on_steroids (0.1.0.4)
       bootstrap-datepicker-rails (~> 1)
       bootstrap-multiselect-rails (~> 0.9)
       kaminari (~> 1.1)
