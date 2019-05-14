@@ -35,8 +35,8 @@ module TableOnSteroids
     included do
       OBJECTS_PER_PAGE = 50
     end
-
-    def filter_and_order(objects, columns_on_steroid, global_search=nil, include_counts=false )
+  
+    def filter_and_order(objects, columns_on_steroid, global_search=nil, include_counts=false, all_pages=false )
       # execute the global search if you have one
       objects = global_search.call(objects,params[:search]) if global_search && params[:search].present?
 
@@ -69,7 +69,7 @@ module TableOnSteroids
       end
 
       #pagination 
-      
+      return (include_counts ? [objects, 1, objects.count] : objects) if all_pages
       if(objects.is_a?(ActiveRecord::Base) || objects.is_a?(ActiveRecord::Relation))
         objects = objects.page(params[:page]).per(OBJECTS_PER_PAGE) 
         total_pages = objects.total_pages
@@ -82,8 +82,23 @@ module TableOnSteroids
       end
       include_counts ? [objects, total_pages, total_count] : objects
     end
-
-
+  
+    def table_csv(objects, columns_on_steroid)
+      titles = []
+      csvs = CSV.generate do |csv|
+        columns_on_steroid.select{ |c,v| v[:download_value_lambda].present? }.each{ |c,v| ((v[:download_label].present?) ? titles.push(*v[:download_label]) : titles << v[:label]) }
+        csv << titles
+        objects.each do |o|
+          vals = []
+          columns_on_steroid.select{ |c,v| v[:download_value_lambda].present? }.each do |c,v| 
+            vals.push(*v[:download_value_lambda].call(o))
+          end
+          csv << vals
+        end
+      end
+    end
+  
+  
     def objects_where(objects, columns_on_steroid, t)
       columns_on_steroid.select{ 
         |c,v| v[t] && v[t][:search_lambda].present? }.each{ 
