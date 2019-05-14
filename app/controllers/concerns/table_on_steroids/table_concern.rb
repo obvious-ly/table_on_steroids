@@ -27,6 +27,7 @@
 #
 #####
 require 'kaminari'
+require 'csv'
 
 module TableOnSteroids
   module TableConcern

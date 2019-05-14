@@ -3,7 +3,7 @@
   <% columns_on_steroid.each_pair do | k , v | %>
     <td class="column column-<%= k %> <%= 'd-none' unless selected_columns.include?(k) %> filter-cell-left <%= v[:css_class].join(' ') if(v[:css_class]) %> <%= table_on_steroid_id %>">
       <% if v[:type] == 'filter' %>
-        <%= select_tag("filters[#{k}]", options_for_select(v[:select_values], params[:filters] && params[:filters][k]), multiple: v[:multiselect], class: 'selectpicker form-control filter-control', form: "knowledge_base_filters#{table_on_steroid_id}", data: { "none-selected-text" => v[:label], style: 'table-on-steroids-selectpicker ', table_on_steroid_id: table_on_steroid_id}, table_on_steroid_id: table_on_steroid_id ) %>
+        <%= select_tag("filters[#{k}]", options_for_select(v[:select_values], params[:filters] && params[:filters][k]), multiple: v[:multiselect], class: 'form-control filter-control', form: "knowledge_base_filters#{table_on_steroid_id}", data: { "none-selected-text" => v[:label], style: 'table-on-steroids-selectpicker ', table_on_steroid_id: table_on_steroid_id}, table_on_steroid_id: table_on_steroid_id ) %>
       <% elsif((v[:activerecord].present? && v[:activerecord][:search_lambda].present?) || (v[:array].present? && v[:array][:search_lambda].present?)) %>
         <% operator_present = (v[:datatype].present? && ['date','integer'].include?(v[:datatype])) %>
         <% if operator_present %>

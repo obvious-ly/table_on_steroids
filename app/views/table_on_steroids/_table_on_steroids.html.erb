@@ -10,6 +10,7 @@
 <% title ||= nil %>
 <% subtext ||= nil %>
 <% subtext_partial ||= nil %>
+<% csv_image ||= nil %>
 <% param_hash = CGI::parse(request.query_string) %>
 <% expected_column_keys = columns.map{|col,col_values| col }+columns.map{|col,col_values|("search_" + col)}+columns.map{|col,col_values|("search_operator_" + col)} %>
 <div class="table-on-steroids" id="<%= table_on_steroid_id %>">
@@ -54,8 +55,8 @@
   </div>
   <% if(download_csv) %>
     <div class="float-right">
-      <a href="<%= (download_csv + "?filter=#{request.query_string.to_s}") %>" style="float:right">
-        <%= image_tag "csv.png", :height => "25", :style => "padding-top:5px;" %>
+      <a href="<%= (download_csv + "?filter=#{request.query_string.to_s}") %>" style="float:right" target="_blank">
+        <%= image_tag csv_image || "csv.png", :height => "25", :style => "padding-top:5px;" %>
       </a>
     </div>
   <% end %>
