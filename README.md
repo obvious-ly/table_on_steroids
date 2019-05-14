@@ -22,7 +22,94 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+### Add assets
+
+application.js
+
+```
+//= require table_on_steroids
+```
+
+application.scss
+```
+    @import "table_on_steroids";
+```
+
+### In the controller
+#### Add the concern 
+
+```
+  require 'table_on_steroids'
+  include TableOnSteroids::TableConcern
+```
+
+#### Define a global search (optional)*
+```
+  def global_search
+    @global_search_lambda ||= nil #put whatever lambda you want here -> (objects, query) { objects.deep_search(query) }
+  end
+```
+
+#### Define your columns
+
+The columns are defined by a hash: 
+Key: a key defining the column
+
+options:
+ - *label*: column title
+ - *type*:
+ - *value_lambda*: how to get the value of this object. "context" is the view context. You can use it to call view methods (eg: `context.link_to` ... ; `context.render` ...)
+ - array : array lambdas for search and order
+        - filter_lambda
+        - order_lambda
+        - search_lambda
+ - activerecord : activerecord lambdas for search and order
+        - filter_lambda
+        - order_lambda
+        - search_lambda
+
+
+```
+def columns_on_steroid
+    @columns_on_steroid ||= {
+      'email' => {
+        label: "email",
+        type: 'order',
+        array: {
+          order_lambda: -> (objects) { objects.sort_by{ |o| o.user.email.downcase } }
+        },
+        activerecord: {
+          search_lambda: -> (objects, v) { objects.joins(:user).where('users.email ilike ?', ("%" + v + "%")) }
+        },
+        value_lambda: -> (object, context) { object.user.email } 
+      }, ..
+```
+#### Use the columns to search and order
+```
+    @objects = filter_and_order(@objects, columns_on_steroid, global_search)
+```
+#### Use the columns to create a csv
+add *download_value_lambda* to your table columns
+```
+    table_csv(@objects , columns_on_steroid_fulfillment)
+```
+
+### In the view
+
+Render the table
+
+```
+    = render partial: 'table_on_steroids/table_on_steroids', locals: { objects: @objects, columns: @columns_on_steroid}
+
+```
+
+_locals extra options:_
+- title
+- download_csv: the link of the download csv 
+- table_on_steroid_id
+- omit_columns
+
+
 
 ## Development
 
