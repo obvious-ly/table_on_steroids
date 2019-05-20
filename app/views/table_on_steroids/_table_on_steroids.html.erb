@@ -51,7 +51,7 @@
     <% end %>
   </div>
   <div class="column_filter">
-    <%= select_tag("columns#{table_on_steroid_id}", options_for_select(columns.map{|c| [c[1][:label], c[0]]}, selected_columns), multiple: true, class: "column-selector table-on-steroids-selectpicker #{table_on_steroid_id}", data: {"none-selected-text" => "Display columns (max #{max_column})", "max-options" => max_column }, form: "knowledge_base_filters#{table_on_steroid_id}") %>
+    <%= select_tag("columns#{table_on_steroid_id}", options_for_select(columns.map{|c| [c[1][:label], c[0]]}, selected_columns), multiple: true, class: "column-selector table-on-steroids-selectpicker #{table_on_steroid_id}", data: {"none-selected-text" => "Display columns (max #{max_column})", "max-options" => max_column }, form: "knowledge_base_filters#{table_on_steroid_id}", style: 'table-on-steroids-selectpicker ') %>
   </div>
   <% if(download_csv) %>
     <div class="float-right">

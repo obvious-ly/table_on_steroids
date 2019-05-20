@@ -1,4 +1,4 @@
-//= require bootstrap-multiselect
+//= require bootstrap-select
 //= require bootstrap-datepicker
 
 
@@ -9,38 +9,17 @@ var TableOnSteroids =  {
     this.initColumnSelection();
     this.initDatePicker();
     this.observe();
-    $('.filter-cell-left select[multiple]').multiselect({inheritClass: true});
+    $('.filter-cell-left select[multiple]').selectpicker();
   },
   initColumnSelection: function(){
     var _this = this;
-    $('.column_filter select[multiple]').multiselect({
-      inheritClass: true, 
-      buttonWidth: '400px',
-      maxHeight: 250,
-      onChange: function(option, checked, select) {
-        var tableOnSteroidId = $(option).closest(".table-on-steroids").attr("id");
-        _this.$element.find('.column.' + tableOnSteroidId).addClass('d-none');
-        option.parent().val().forEach(function(element) {
-          _this.$element.find('.column-'+element).removeClass('d-none')+' .'+tableOnSteroidId
-        });
-      },
-      buttonText: function(options, select) {
-        if (options.length > 4) {
-            return options.length + ' columns displayed';
-        }
-         else {
-             var labels = [];
-             options.each(function() {
-                 if ($(this).attr('label') !== undefined) {
-                     labels.push($(this).attr('label'));
-                 }
-                 else {
-                     labels.push($(this).html());
-                 }
-             });
-             return labels.join(', ') + '';
-         }
-      }
+    $('.column_filter select[multiple]').selectpicker();
+    $('.column_filter select[multiple]').on('change', function(e) {
+      var tableOnSteroidId = $(e.currentTarget).closest(".table-on-steroids").attr("id");
+      _this.$element.find('.column.' + tableOnSteroidId).addClass('d-none');
+      $(e.currentTarget).val().forEach(function(element) {
+        _this.$element.find('.column-'+element).removeClass('d-none')+' .'+tableOnSteroidId
+      });
     });
   },
   observe: function(){
