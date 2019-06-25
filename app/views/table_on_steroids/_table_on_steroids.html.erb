@@ -13,6 +13,10 @@
 <% csv_image ||= nil %>
 <% param_hash = CGI::parse(request.query_string) %>
 <% expected_column_keys = columns.map{|col,col_values| col }+columns.map{|col,col_values|("search_" + col)}+columns.map{|col,col_values|("search_operator_" + col)} %>
+<% column_search_lambdas = columns.collect{|k,v| 
+                                (!v.dig(:datatype) && v.dig(:activerecord,:search_lambda)) || v.dig(:activerecord,:global_search_lambda) ||
+                                (!v.dig(:datatype) && v.dig(:array,:search_lambda)) || v.dig(:array,:global_search_lambda) }.compact %>
+
 <div class="table-on-steroids" id="<%= table_on_steroid_id %>">
   <%= form_tag request.path, method: "get", id: ("knowledge_base_filters" + table_on_steroid_id) do %>
     <% param_hash.select{ |k,v| !expected_column_keys.include?(k) && !["utf8","columns[]"].include?(k) }.each do |k,v| %>
@@ -20,15 +24,15 @@
     <% end %>
   <%end%>
   <div class="row">
-    <div class="col-8 col-sn-12">
+    <div class="col-6 col-sn-12">
       <div class="header-text-h1">
         <% if title %>
           <%= title %>
         <% end %>
       </div>
     </div>
-    <div class="col-8 col-sn-12" style="text-align:right">
-      <% if(search_lambda) %>
+    <div class="col-6 col-sn-12" style="text-align:right;margin-bottom:10px">
+      <% if(search_lambda || !column_search_lambdas.empty?) %>
         <%= text_field_tag 'search', params[:search], placeholder: 'Search ..', onchange: "$('#knowledge_base_filters#{table_on_steroid_id}').submit();", class: 'form-control global-search', form: "knowledge_base_filters#{table_on_steroid_id}"  %>
       <% end %>
     </div>
