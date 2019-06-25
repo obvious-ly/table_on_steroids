@@ -7,7 +7,7 @@ require "table_on_steroids/version"
 Gem::Specification.new do |spec|
   spec.name          = "table_on_steroids"
   spec.version       = TableOnSteroids::VERSION
-  spec.authors       = ["Marieke Gueye", "Matt Hyatt"]
+  spec.authors       = ["Marieke Gueye", "Matt Hiatt"]
   spec.email         = ["marieke@obvious.ly"]
 
   spec.summary       = %q{Create awesome tables for rails}
