@@ -39,7 +39,10 @@ module TableOnSteroids
   
     def filter_and_order(objects, columns_on_steroid, global_search=nil, include_counts=false, all_pages=false )
       # execute the global search if you have one
-      objects = global_search.call(objects,params[:search]) if global_search && params[:search].present?
+      if(params[:search].present?)
+        objects = global_search.call(objects,params[:search]) if global_search
+        objects = all_column_search(objects,columns_on_steroid, params[:search]) if !global_search
+      end
 
       [:activerecord, :array].each do |t|
 
@@ -98,6 +101,23 @@ module TableOnSteroids
         end
       end
     end
+
+    def all_column_search(objects, columns_on_steroid, query)
+      matched_object_ids = []
+      [:activerecord, :array].each do |t|
+        columns_on_steroid.each do |key, value|
+          if(value[t].present? && ((value[t][:search_lambda].present? && !["date","integer"].include?(value[:datatype])) || value[t][:global_search_lambda].present?))
+            if(value[t][:global_search_lambda].present?)
+              objects_returned = value[t][:global_search_lambda].call(objects, query)
+            else
+              objects_returned = value[t][:search_lambda].call(objects, query)
+            end
+            objects_returned.each{|o| matched_object_ids << o.id } if(objects_returned)
+          end
+        end
+      end
+      objects = objects.where(id: matched_object_ids.uniq)
+    end
   
   
     def objects_where(objects, columns_on_steroid, t)
@@ -137,7 +157,7 @@ module TableOnSteroids
     end
 
     def object_where_integer(integer, operator, value)
-        case operator
+      case operator
       when "<",">=" then
         return integer.to_f < value.to_f
       when "=" then
@@ -168,7 +188,6 @@ module TableOnSteroids
 
         objects = objects.where(where_sql, *values)
       end
-
       objects
     end
   end
