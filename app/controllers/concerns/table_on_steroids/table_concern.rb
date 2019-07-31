@@ -79,10 +79,9 @@ module TableOnSteroids
         total_pages = objects.total_pages
         total_count = objects.total_count
       else 
-        total_count = objects.count
-        total_pages = total_count / OBJECTS_PER_PAGE.to_f 
-        current_offset = OBJECTS_PER_PAGE * ((params[:page] || 1) - 1)
-        objects = objects[current_offset..(current_offset + OBJECTS_PER_PAGE)]
+        objects = Kaminari.paginate_array(objects).page(params[:page]).per(OBJECTS_PER_PAGE)
+        total_pages = objects.total_pages
+        total_count = objects.total_count
       end
       include_counts ? [objects, total_pages, total_count] : objects
     end
