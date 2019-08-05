@@ -64,8 +64,11 @@ module TableOnSteroids
             objects = objects.reorder(nil) if(objects.is_a?(ActiveRecord::Base) || objects.is_a?(ActiveRecord::Relation))
             objects = object_order[t][:order_lambda].call(objects)
           end
-        elsif(object_order = columns_on_steroid.select{ |c,v| v[:default_order]}.collect{ |c,v| v[:order_lambda] }).present?
-          objects = object_order.call(objects)
+      elsif  ( object_order = columns_on_steroid.select{ |c,v| v[t] && v[t][:default_order] }.first&.last).present?
+          if(object_order[t] && object_order[t][:order_lambda])  
+            objects = objects.reorder(nil) if(objects.is_a?(ActiveRecord::Base) || objects.is_a?(ActiveRecord::Relation))
+            objects = object_order[t][:order_lambda].call(objects)
+          end
         elsif(objects.is_a?(ActiveRecord::Base) || objects.is_a?(ActiveRecord::Relation))
           #objects = objects.order('created_at desc')
         end

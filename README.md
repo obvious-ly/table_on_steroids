@@ -63,10 +63,12 @@ options:
         - filter_lambda
         - order_lambda
         - search_lambda
+        - default_order (true|false)
  - activerecord : activerecord lambdas for search and order
         - filter_lambda
         - order_lambda
         - search_lambda
+        - default_order (true|false)
 
 
 ```
