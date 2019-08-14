@@ -37,11 +37,11 @@ module TableOnSteroids
       OBJECTS_PER_PAGE = 50
     end
   
-    def filter_and_order(objects, columns_on_steroid, global_search=nil, include_counts=false, all_pages=false )
+    def filter_and_order(objects, columns_on_steroid, global_search=nil, include_counts=false, all_pages=false, table_on_steroids=nil )
       # execute the global search if you have one
       if(params[:search].present?)
         objects = global_search.call(objects,params[:search]) if global_search
-        objects = all_column_search(objects,columns_on_steroid, params[:search]) if !global_search
+        objects = all_column_search(objects, columns_on_steroid, params[:search], table_on_steroids) if !global_search
       end
 
       [:activerecord, :array].each do |t|
@@ -64,7 +64,7 @@ module TableOnSteroids
             objects = objects.reorder(nil) if(objects.is_a?(ActiveRecord::Base) || objects.is_a?(ActiveRecord::Relation))
             objects = object_order[t][:order_lambda].call(objects)
           end
-      elsif  ( object_order = columns_on_steroid.select{ |c,v| v[t] && v[t][:default_order] }.first&.last).present?
+        elsif  ( object_order = columns_on_steroid.select{ |c,v| v[t] && v[t][:default_order] }.first&.last).present?
           if(object_order[t] && object_order[t][:order_lambda])  
             objects = objects.reorder(nil) if(objects.is_a?(ActiveRecord::Base) || objects.is_a?(ActiveRecord::Relation))
             objects = object_order[t][:order_lambda].call(objects)
@@ -104,8 +104,11 @@ module TableOnSteroids
       end
     end
 
-    def all_column_search(objects, columns_on_steroid, query)
-      matched_object_ids = []
+    def all_column_search(objects, columns_on_steroid, query, table_on_steroids=nil)
+      global_search_key = table_on_steroids&.dig(:global_search_key) || :id
+      global_search_key_params = {}
+      matched_object_keys = []
+
       [:activerecord, :array].each do |t|
         columns_on_steroid.each do |key, value|
           if(value[t].present? && ((value[t][:search_lambda].present? && !["date","integer"].include?(value[:datatype])) || value[t][:global_search_lambda].present?))
@@ -114,11 +117,13 @@ module TableOnSteroids
             else
               objects_returned = value[t][:search_lambda].call(objects, query)
             end
-            objects_returned.each{|o| matched_object_ids << o.id } if(objects_returned)
+            objects_returned.each{|o| matched_object_keys << o.send(global_search_key) } if(objects_returned)
           end
         end
       end
-      objects = objects.where(id: matched_object_ids.uniq)
+      
+      global_search_key_params[global_search_key] = matched_object_keys.uniq
+      objects = objects.where(global_search_key_params)
     end
   
   
