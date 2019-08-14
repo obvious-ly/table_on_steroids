@@ -117,11 +117,11 @@ module TableOnSteroids
             else
               objects_returned = value[t][:search_lambda].call(objects, query)
             end
-            objects_returned.each{|o| matched_object_keys << o.send(global_search_key) } if(objects_returned)
+            objects_returned.each{|o| matched_object_keys << o[global_search_key] } if(objects_returned)
           end
         end
       end
-      
+
       global_search_key_params[global_search_key] = matched_object_keys.uniq
       objects = objects.where(global_search_key_params)
     end
