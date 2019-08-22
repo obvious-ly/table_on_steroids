@@ -1,0 +1,25 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/ruby:2.4.1
+    steps:
+      - checkout
+
+      - restore_cache:
+          keys:
+            - table-on-steroids-bundle-{{checksum "Gemfile.lock"}}
+            - table-on-steroids-bundle-
+
+      - run:
+          name: bundle install
+          command: bundle check --path vendor/bundle || bundle install --deployment
+
+      - save_cache:
+          key: table-on-steroids-bundle-{{checksum "Gemfile.lock"}}
+          paths:
+            - vendor/bundle
+
+      - run:
+          name: Run spec
+          command: bundle exec rspec
