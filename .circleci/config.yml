@@ -1,0 +1,14 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/ruby:2.4.1
+    steps:
+      - checkout
+      - run:
+          name: "bundle install"
+          command: "bundle check --path vendor/bundle || bundle install --deployment"
+
+      - run:
+          name: "Run spec"
+          command: "bundle exec rspec"
