@@ -5,10 +5,21 @@ jobs:
       - image: circleci/ruby:2.4.1
     steps:
       - checkout
-      - run:
-          name: "bundle install"
-          command: "bundle check --path vendor/bundle || bundle install --deployment"
+
+      - restore_cache:
+          keys:
+            - table-on-steroids-bundle-{{checksum "Gemfile.lock"}}
+            - table-on-steroids-bundle-
 
       - run:
-          name: "Run spec"
-          command: "bundle exec rspec"
+          name: bundle install
+          command: bundle check --path vendor/bundle || bundle install --deployment
+
+      - save_cache:
+          key: table-on-steroids-bundle-{{checksum "Gemfile.lock"}}
+          paths:
+            - vendor/bundle
+
+      - run:
+          name: Run spec
+          command: bundle exec rspec
