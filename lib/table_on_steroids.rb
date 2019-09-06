@@ -1,4 +1,4 @@
-require "table_on_steroids/version"
+require 'table_on_steroids/version'
 require 'bootstrap-datepicker-rails'
 require 'bootstrap-select-rails'
 
