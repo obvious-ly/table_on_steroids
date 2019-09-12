@@ -105,7 +105,9 @@ module TableOnSteroids
     end
 
     def all_column_search(objects, columns_on_steroid, query, table_on_steroids=nil)
-      global_search_key = table_on_steroids&.dig(:global_search_key) || :id
+      global_active_record_search_key = table_on_steroids&.dig(:global_active_record_search_key) || :id
+      global_array_search_key_index = table_on_steroids&.dig(:global_array_search_key_index) || 0
+      global_search_key = ((objects && objects[0].is_a?(Array)) ? global_array_search_key_index : global_active_record_search_key)
       global_search_key_params = {}
       matched_object_keys = []
 
@@ -122,8 +124,12 @@ module TableOnSteroids
         end
       end
 
-      global_search_key_params[global_search_key] = matched_object_keys.uniq
-      objects = objects.where(global_search_key_params)
+      if(objects.is_a?(ActiveRecord::Base) || objects.is_a?(ActiveRecord::Relation))
+        global_search_key_params[global_active_record_search_key] = matched_object_keys.uniq
+        objects = objects.where(global_search_key_params)
+      elsif(objects.is_a?(Array))
+        objects = objects.select{|o| o if(matched_object_keys.uniq.include?(o[global_search_key]))}
+      end
     end
   
   
