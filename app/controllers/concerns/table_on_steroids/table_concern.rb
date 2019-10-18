@@ -39,7 +39,7 @@ module TableOnSteroids
       OBJECTS_PER_PAGE = 50
     end
 
-    def filter_and_order(objects, columns_on_steroid, global_search = nil, include_counts = false, all_pages = false, table_on_steroids = nil)
+    def filter_and_order(objects, columns_on_steroid, global_search = nil, include_counts = false, all_pages = false, table_on_steroids = nil, opts = {})
       # execute the global search if you have one
       if params[:search].present?
         objects = global_search.call(objects, params[:search]) if global_search
@@ -79,6 +79,7 @@ module TableOnSteroids
       # pagination
       return (include_counts ? [objects, 1, objects.count] : objects) if all_pages
 
+      unpaginated_objects = objects
       if objects.is_a?(ActiveRecord::Base) || objects.is_a?(ActiveRecord::Relation)
         objects = objects.page(params[:page]).per(OBJECTS_PER_PAGE)
         total_pages = objects.total_pages
@@ -88,6 +89,17 @@ module TableOnSteroids
         total_pages = objects.total_pages
         total_count = objects.total_count
       end
+      # fetch_extra object if needed
+
+      if (fetch_object_id = opts[:fetch_object_id]).present? &&
+         (fetch_object_lambda = opts[:fetch_object_search_lambda]) &&
+         (key_lambda = opts[:key_lambda])
+        extra_objects = fetch_object_lambda.call(unpaginated_objects, fetch_object_id)
+        unless (extra_objects.map { |o| key_lambda.call(o) } & objects.map { |o| key_lambda.call(o) }).present?
+          objects = extra_objects + objects
+        end
+      end
+
       include_counts ? [objects, total_pages, total_count] : objects
     end
 
