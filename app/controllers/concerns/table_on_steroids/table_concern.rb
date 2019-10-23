@@ -220,6 +220,8 @@ module TableOnSteroids
       return params[:page] unless active_record_object_fetch_opts && key_lambda
 
       object = objects.where(active_record_object_fetch_opts).first
+      return params[:page] unless object
+
       index = objects.index { |o| key_lambda.call(o) == key_lambda.call(object) }
       index ? index / OBJECTS_PER_PAGE + 1 : params[:page]
     end
