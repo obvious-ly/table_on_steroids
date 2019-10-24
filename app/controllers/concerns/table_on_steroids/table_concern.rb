@@ -59,10 +59,17 @@ module TableOnSteroids
         end
 
         #order
-        if params[:knowledge] && params[:knowledge] && params[:knowledge][:order].present? && (object_order = columns_on_steroid[params[:knowledge][:order]]).present?       
+        if params&.dig(:knowledge,:order) && (object_order = columns_on_steroid[params[:knowledge][:order]]).present?       
           if(object_order[t] && object_order[t][:order_lambda])
+            direction = (params&.dig(:knowledge,:ascending).to_s == 'true') ? 'asc' : 'desc'
             objects = objects.reorder(nil) if(objects.is_a?(ActiveRecord::Base) || objects.is_a?(ActiveRecord::Relation))
-            objects = object_order[t][:order_lambda].call(objects)
+            objects = object_order[t][:order_lambda].call(objects, direction)
+          end
+        elsif object_order = columns_on_steroid[table_on_steroids&.dig(:default_order_column)]
+          if(object_order[t] && object_order[t][:order_lambda])
+            direction = object_order[t][:default_order_direction] || 'asc'
+            objects = objects.reorder(nil) if(objects.is_a?(ActiveRecord::Base) || objects.is_a?(ActiveRecord::Relation))
+            objects = object_order[t][:order_lambda].call(objects, direction)
           end
         elsif  ( object_order = columns_on_steroid.select{ |c,v| v[t] && v[t][:default_order] }.first&.last).present?
           if(object_order[t] && object_order[t][:order_lambda])  
@@ -72,7 +79,6 @@ module TableOnSteroids
         elsif(objects.is_a?(ActiveRecord::Base) || objects.is_a?(ActiveRecord::Relation))
           #objects = objects.order('created_at desc')
         end
-
       end
 
       #pagination 
