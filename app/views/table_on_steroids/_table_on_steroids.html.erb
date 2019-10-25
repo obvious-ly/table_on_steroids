@@ -77,8 +77,8 @@
           <th class="column column-<%= k %> <%= ' d-none ' unless selected_columns.include?(k) %> <%= v[:css_class].join(' ') if(v[:css_class]) %> <%= table_on_steroid_id %>">
             <%= v[:label] %>
             <% if v[:type] == 'order' %>
-              <%= image_tag "up_arrow_white.svg", :style => "margin-left:5px;margin-right:5px;margin-bottom:5px;height:8px;cursor:pointer", onclick: "$('#knowledge_order#{table_on_steroid_id}').val('" + k + "');$('#knowledge_ascending#{table_on_steroid_id}').val('true');$('#knowledge_base_filters#{table_on_steroid_id}').submit();" %>
-              <%= image_tag "down_arrow_white.svg", :style => "margin-left:5px;margin-right:5px;margin-bottom:5px;height:8px;cursor:pointer", onclick: "$('#knowledge_order#{table_on_steroid_id}').val('" + k + "');$('#knowledge_ascending#{table_on_steroid_id}').val('false');$('#knowledge_base_filters#{table_on_steroid_id}').submit();" %>
+              <%= image_tag "up_arrow_white.svg", onclick: "$('#knowledge_order#{table_on_steroid_id}').val('" + k + "');$('#knowledge_ascending#{table_on_steroid_id}').val('true');$('#knowledge_base_filters#{table_on_steroid_id}').submit();" %>
+              <%= image_tag "down_arrow_white.svg", onclick: "$('#knowledge_order#{table_on_steroid_id}').val('" + k + "');$('#knowledge_ascending#{table_on_steroid_id}').val('false');$('#knowledge_base_filters#{table_on_steroid_id}').submit();" %>
             <% end %>
           </th>
         <% end %>
