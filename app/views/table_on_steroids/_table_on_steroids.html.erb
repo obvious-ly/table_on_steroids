@@ -19,7 +19,8 @@
 
 <div class="table-on-steroids" id="<%= table_on_steroid_id %>">
   <%= form_tag request.path, method: "get", id: ("knowledge_base_filters" + table_on_steroid_id) do %>
-    <% param_hash.select{ |k,v| !expected_column_keys.include?(k) && !["utf8","columns[]"].include?(k) }.each do |k,v| %>
+    <% param_hash.select{ |k,v| !expected_column_keys.include?(k) && !["utf8","columns[]","knowledge[order]","knowledge[ascending]"].include?(k) }.each do |k,v| %>
+
       <%= hidden_field_tag k, v[0]  %>
     <% end %>
   <%end%>
@@ -70,16 +71,14 @@
   <table class="table table-striped table-bordered table-hover">
     <thead>
       <tr>
+        <%= hidden_field_tag('knowledge[order]', params&.dig(:knowledge,:order), id: "knowledge_order#{table_on_steroid_id}", form: "knowledge_base_filters#{table_on_steroid_id}") %>
+        <%= hidden_field_tag('knowledge[ascending]', params&.dig(:knowledge,:ascending), id: "knowledge_ascending#{table_on_steroid_id}", form: "knowledge_base_filters#{table_on_steroid_id}") %>
         <% columns.each_pair do | k , v | %>
           <th class="column column-<%= k %> <%= ' d-none ' unless selected_columns.include?(k) %> <%= v[:css_class].join(' ') if(v[:css_class]) %> <%= table_on_steroid_id %>">
+            <%= v[:label] %>
             <% if v[:type] == 'order' %>
-              <label>
-                <%= v[:label] %>
-                <%= radio_button('knowledge', 'order', k, onchange: "$('#knowledge_base_filters#{table_on_steroid_id}').submit();", checked: params[:knowledge] && params[:knowledge][:order] == k, form: "knowledge_base_filters#{table_on_steroid_id}" ) %>
-                v
-              </label>
-            <% else %>
-              <%= v[:label] %>
+              <%= image_tag "up_arrow_white.svg", onclick: "$('#knowledge_order#{table_on_steroid_id}').val('" + k + "');$('#knowledge_ascending#{table_on_steroid_id}').val('true');$('#knowledge_base_filters#{table_on_steroid_id}').submit();" %>
+              <%= image_tag "down_arrow_white.svg", onclick: "$('#knowledge_order#{table_on_steroid_id}').val('" + k + "');$('#knowledge_ascending#{table_on_steroid_id}').val('false');$('#knowledge_base_filters#{table_on_steroid_id}').submit();" %>
             <% end %>
           </th>
         <% end %>
