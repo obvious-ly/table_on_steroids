@@ -99,8 +99,6 @@
     </tbody>
   </table>
   <div style="padding-top:20px">
-    <% if(objects.is_a?(ActiveRecord::Base) || objects.is_a?(ActiveRecord::Relation)) %>
-      <%= paginate objects, theme: 'twitter-bootstrap-4' %>
-    <% end %>
+    <%= paginate objects, theme: 'twitter-bootstrap-4' %>
   </div>
 </div>
