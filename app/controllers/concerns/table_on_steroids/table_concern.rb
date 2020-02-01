@@ -50,18 +50,16 @@ module TableOnSteroids
         # column search
         objects = objects_where(objects, columns_on_steroid, t)
 
-        # apply filters
-        if params[:filters].present?
-          params[:filters].each_pair do |k, v|
-            filter = columns_on_steroid[k]
-            next unless filter.present? && filter[t].present?
-
-            objects = filter[t][:filter_lambda].call(objects, v)
+        filter_columns = columns_on_steroid.map{|k,v| k if v.dig(t,:filter_lambda) }.compact
+        filter_columns.each do |k|
+          filter_value = (params[:filters] && params[:filters][k]) || params[k]
+          if(!filter_value.blank?)
+            objects = columns_on_steroid[k][t][:filter_lambda].call(objects, filter_value)
           end
         end
 
         #order
-        if params&.dig(:knowledge,:order) && (object_order = columns_on_steroid[params[:knowledge][:order]]).present?       
+        if params&.dig(:knowledge,:order) && (object_order = columns_on_steroid[params[:knowledge][:order]]).present?
           if(object_order[t] && object_order[t][:order_lambda])
             direction = (params&.dig(:knowledge,:ascending).to_s == 'true') ? 'asc' : 'desc'
             objects = objects.reorder(nil) if(objects.is_a?(ActiveRecord::Base) || objects.is_a?(ActiveRecord::Relation))
