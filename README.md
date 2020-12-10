@@ -129,7 +129,7 @@ Bug reports and pull requests are welcome on GitHub at https://github.com/[USERN
 2. `gem build table_on_steroids` it will create a .gem file
 3. `gem push table_on_steroids-[newversion].gem`
 
-Adding an owner `gem owner --add {{email}} {{gem}}`
+Adding an owner `gem owner --add {{email}} {{gem}}` (the person must have a https://rubygems.org/ account)
 
 ## License
 
