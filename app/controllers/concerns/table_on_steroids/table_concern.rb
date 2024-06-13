@@ -39,7 +39,10 @@ module TableOnSteroids
       OBJECTS_PER_PAGE = 50
     end
 
-    def filter_and_order(objects, columns_on_steroid, global_search = nil, include_counts = false, all_pages = false, table_on_steroids = nil)
+    def filter_and_order(objects, columns_on_steroid, global_search = nil, include_counts = false, all_pages = false, table_on_steroids = nil, rows_to_display = nil)
+
+      limit = rows_to_display || OBJECTS_PER_PAGE
+
       # execute the global search if you have one
       if params[:search].present?
         objects = global_search.call(objects, params[:search]) if global_search
@@ -85,14 +88,14 @@ module TableOnSteroids
       return (include_counts ? [objects, 1, objects.count] : objects) if all_pages
 
       # GO to specific object page
-      page = get_page(objects, params, table_on_steroids)
+      page = get_page(objects, params, table_on_steroids, limit)
 
       if objects.is_a?(ActiveRecord::Base) || objects.is_a?(ActiveRecord::Relation)
-        objects = objects.page(page).per(OBJECTS_PER_PAGE)
+        objects = objects.page(page).per(limit)
         total_pages = objects.total_pages
         total_count = objects.total_count
       else
-        objects = Kaminari.paginate_array(objects).page(page).per(OBJECTS_PER_PAGE)
+        objects = Kaminari.paginate_array(objects).page(page).per(limit)
         total_pages = objects.total_pages
         total_count = objects.total_count
       end
@@ -219,7 +222,7 @@ module TableOnSteroids
       objects
     end
 
-    def get_page(objects, params, table_on_steroids)
+    def get_page(objects, params, table_on_steroids, limit)
       active_record_object_fetch_opts = table_on_steroids&.dig(:active_record_object_fetch_opts)
       key_lambda = table_on_steroids&.dig(:key_lambda)
       return params[:page] unless active_record_object_fetch_opts && key_lambda
@@ -228,7 +231,7 @@ module TableOnSteroids
       return params[:page] unless object
 
       index = objects.index { |o| key_lambda.call(o) == key_lambda.call(object) }
-      index ? index / OBJECTS_PER_PAGE + 1 : params[:page]
+      index ? index / limit + 1 : params[:page]
     end
   end
 end
