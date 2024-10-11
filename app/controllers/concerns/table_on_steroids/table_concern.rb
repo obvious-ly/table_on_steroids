@@ -40,7 +40,6 @@ module TableOnSteroids
     end
 
     def filter_and_order(objects, columns_on_steroid, global_search = nil, include_counts = false, all_pages = false, table_on_steroids = nil, rows_to_display = nil)
-
       limit = rows_to_display || OBJECTS_PER_PAGE
 
       # execute the global search if you have one
@@ -102,15 +101,21 @@ module TableOnSteroids
       include_counts ? [objects, total_pages, total_count, page] : objects
     end
 
-    def table_csv(objects, columns_on_steroid)
+    def table_csv(objects, columns_on_steroid, client = false)
       titles = []
+      value_lambda = :download_value_lambda
+      label = :download_label
+      if(client)
+        value_lambda = :client_download_value_lambda
+        label = :client_download_label
+      end
       csvs = CSV.generate do |csv|
-        columns_on_steroid.select { |_c, v| v[:download_value_lambda].present? }.each { |_c, v| (v[:download_label].present? ? titles.push(*v[:download_label]) : titles << v[:label]) }
+        columns_on_steroid.select { |_c, v| v[value_lambda].present? }.each { |_c, v| (v[label].present? ? titles.push(*v[label]) : titles << v[:label]) }
         csv << titles
         objects.each do |o|
           vals = []
-          columns_on_steroid.select { |_c, v| v[:download_value_lambda].present? }.each do |_c, v|
-            vals.push(*v[:download_value_lambda].call(o))
+          columns_on_steroid.select { |_c, v| v[value_lambda].present? }.each do |_c, v|
+            vals.push(*v[value_lambda].call(o))
           end
           csv << vals
         end
